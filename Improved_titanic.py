@@ -22,6 +22,14 @@ test_df = pd.read_csv('input/test.csv')
 combine = [train_df, test_df]
 
 
+'''
+This is improved preprocessing process from the orignial post. When you look at 
+the code you will be able to see that I added more categories to the age-bands and
+fare-bands which when combined increase the score by about 5%
+
+'''
+
+
 #Here we are dropping Ticket and Cabin columns
 train_df = train_df.drop(['Ticket', 'Cabin'], axis=1)
 test_df = test_df.drop(['Ticket', 'Cabin'], axis=1)
@@ -113,7 +121,7 @@ for dataset in combine:
     dataset.loc[(dataset['Age'] > 65) & (dataset['Age'] <= 70), 'Age'] = 13
     dataset.loc[(dataset['Age'] > 70) & (dataset['Age'] <= 75), 'Age'] = 14
     dataset.loc[(dataset['Age'] > 75) & (dataset['Age'] <= 80), 'Age'] = 15
-    dataset.loc[ dataset['Age'] > 80, 'Age']
+    dataset.loc[ dataset['Age'] > 80, 'Age'] 
 train_df.head()
 
 train_df = train_df.drop(['AgeBand'], axis=1)
@@ -135,9 +143,6 @@ train_df = train_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
 test_df = test_df.drop(['Parch', 'SibSp', 'FamilySize'], axis=1)
 combine = [train_df, test_df]
 
-train_df.head()
-
-#print(train_df.head())
 
 for dataset in combine:
     dataset['Age*Class'] = dataset.Age * dataset.Pclass
@@ -155,10 +160,8 @@ train_df[['Embarked', 'Survived']].groupby(['Embarked'], as_index=False).mean().
 for dataset in combine:
     dataset['Embarked'] = dataset['Embarked'].map( {'S': 0, 'C': 1, 'Q': 2} ).astype(int)
 
-#print(train_df.head())
-
 test_df['Fare'].fillna(test_df['Fare'].dropna().median(), inplace=True)
-#print(test_df.head())
+
 
 train_df['FareBand'] = pd.qcut(train_df['Fare'], 4)
 train_df[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values(by='FareBand', ascending=True)
@@ -174,14 +177,11 @@ for dataset in combine:
 
 train_df = train_df.drop(['FareBand'], axis=1)
 combine = [train_df, test_df]
-    
-#print(train_df.head(10))
-#print(test_df.head(10))
+
 
 X_train = train_df.drop("Survived", axis=1)
 Y_train = train_df["Survived"]
 X_test  = test_df.drop("PassengerId", axis=1).copy()
-#print(X_train.shape, Y_train.shape, X_test.shape)
 
 
 #---Logistic Regression---
@@ -189,62 +189,53 @@ logreg = LogisticRegression()
 logreg.fit(X_train, Y_train)
 Y_pred = logreg.predict(X_test)
 acc_log = round(logreg.score(X_train, Y_train) * 100, 2)
-#print(acc_log)
 
 coeff_df = pd.DataFrame(train_df.columns.delete(0))
 coeff_df.columns = ['Feature']
 coeff_df["Correlation"] = pd.Series(logreg.coef_[0])
 
-#print(coeff_df.sort_values(by='Correlation', ascending=False))
 
 #---Support Vector Machines---
 svc = SVC()
 svc.fit(X_train, Y_train)
 Y_pred = svc.predict(X_test)
 acc_svc = round(svc.score(X_train, Y_train) * 100, 2)
-#print(acc_svc)
 
 #---K-Nearest Neighbors---
 knn = KNeighborsClassifier(n_neighbors = 3)
 knn.fit(X_train, Y_train)
 Y_pred = knn.predict(X_test)
 acc_knn = round(knn.score(X_train, Y_train) * 100, 2)
-#print(acc_knn)
 
 #---Gaussian Naive Bayes---
 gaussian = GaussianNB()
 gaussian.fit(X_train, Y_train)
 Y_pred = gaussian.predict(X_test)
 acc_gaussian = round(gaussian.score(X_train, Y_train) * 100, 2)
-#print(acc_gaussian)
 
 #---Perceptron---
 perceptron = Perceptron()
 perceptron.fit(X_train, Y_train)
 Y_pred = perceptron.predict(X_test)
 acc_perceptron = round(perceptron.score(X_train, Y_train) * 100, 2)
-#print(acc_perceptron)
 
 #---Linear SVC---
 linear_svc = LinearSVC()
 linear_svc.fit(X_train, Y_train)
 Y_pred = linear_svc.predict(X_test)
 acc_linear_svc = round(linear_svc.score(X_train, Y_train) * 100, 2)
-#acc_linear_svc
 
 #---Stochastic Gradient Descent---
 sgd = SGDClassifier()
 sgd.fit(X_train, Y_train)
 Y_pred = sgd.predict(X_test)
 acc_sgd = round(sgd.score(X_train, Y_train) * 100, 2)
-#print(acc_sgd)
 
 #---Decision Tree---
 decision_tree = DecisionTreeClassifier()
 decision_tree.fit(X_train, Y_train)
 Y_pred = decision_tree.predict(X_test)
 acc_decision_tree = round(decision_tree.score(X_train, Y_train) * 100, 2)
-#print(acc_decision_tree)
 
 #---Random Forest---
 random_forest = RandomForestClassifier(n_estimators=100)
@@ -252,7 +243,6 @@ random_forest.fit(X_train, Y_train)
 Y_pred = random_forest.predict(X_test)
 random_forest.score(X_train, Y_train)
 acc_random_forest = round(random_forest.score(X_train, Y_train) * 100, 2)
-#print(acc_random_forest)
 
 models = pd.DataFrame({
     'Model': ['Support Vector Machines', 'KNN', 'Logistic Regression', 
